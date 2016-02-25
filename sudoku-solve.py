@@ -113,17 +113,12 @@ def UseGuess(array, guess):
     return array
     
 field = simple_solve(field)
-# print("--------After simple solve ---------")
-# print(field)
-# print(field-field0)
 row,column = GetZeroPosition(field)
 stack = []
 guesses = []
 stack.append(field)
-#print(stack)
 guesses.append(GetGuesses(field,row,column))
 #guesses[-1].pop() ## TODO remove debug
-#print(guesses)
 while not isSolved(field):
     # Stop if there is no guesses.
     if len(guesses) == 0:
@@ -138,20 +133,13 @@ while not isSolved(field):
     field = np.copy(stack[-1])
     guess = guesses[-1].pop()
     field = UseGuess(field,guess)
-    # print(stack)
     field = simple_solve(field)
-    # print("--------After  solve ---------")
-    # print(field)
-    # print(field - field0)
     if isSolved(field):
         break
     row,column = GetZeroPosition(field)
     stack.append(field)
-    # print(stack)
     guesses.append(GetGuesses(field,row,column))
     print("Stack size = "+str(len(stack)))
-    # print(field)
-    # print(guesses)
     
 if isSolved(field):
     print("Solution result:")
@@ -159,6 +147,3 @@ if isSolved(field):
 else:
     print("Solution FAILED! Last state:")
     print(field)
-    
-
-
