@@ -23,8 +23,6 @@ print("Sudoku to solve")
 print(field)
 
 def isInArray(array, char):
-    array = np.reshape(array,9)
-    #print(array)
     if char in array:
         return True
     else:
@@ -69,31 +67,88 @@ def isValueUsed(array, value, row, column):
         ),value) :
         return True
     return False
-for value in range(1,10):
-    print value
 
 #print simple solve
-changes = True
-while changes:
-    changes = False
+def simple_solve (field):
+    changes = True
+    while changes:
+        changes = False
+        for column in range(9):
+            for row in range(9):
+                if not (field[row,column] == 0):
+                    continue
+                counts = 0
+                new_value = 0
+                for value in range(1,10):
+                    if not isValueUsed(field,value,row,column):
+                        counts += 1
+                        new_value = value
+                    if counts > 1:
+                        break
+                if counts == 1:
+                    field[row,column] = new_value
+                    changes = True
+    return field
+
+def isSolved (array):
+    return not isInArray(array,0)
+
+def GetZeroPosition(array):
     for column in range(9):
         for row in range(9):
-            if not (field[row,column] == 0):
-                continue
-            counts = 0
-            new_value = 0
-            for value in range(1,10):
-                if not isValueUsed(field,value,row,column):
-                    counts += 1
-                    new_value = value
-                if counts > 1:
-                    break
-            if counts == 1:
-                field[row,column] = new_value
-                changes = True
+            if field[row,column] == 0:
+                return row,column
+    return 9,9
+
+def GetGuesses(array, row, column):
+    guesses = []
+    for value in range(1,10):
+        if not isValueUsed(field,value,row,column):
+            guesses.append((value,row,column))
+    return guesses
+
+def UseGuess(array, guess):
+    array[guess[1],guess[2]] = guess[0]
+    return array
     
 
-print("Sudoku to solve")
-print(field)
+field = simple_solve(field)    
+row,column = GetZeroPosition(field)
+stack = []
+guesses = []
+stack.append(field)
+guesses.append(GetGuesses(field,row,column))
+#guesses[-1].pop() ## TODO remove debug
+print(guesses)
+while not isSolved(field):
+    # Stop if there is no guesses.
+    if len(guesses) == 0:
+        print("No more guesses")
+        break
+    # Return to previous branch if current branch failed to solve
+    if len(guesses[-1]) == 0:
+        field = stack.pop()
+        guesses.pop()
+        continue
+    # try a guess
+    field = stack[-1]
+    guess = guesses[-1].pop()
+    field = UseGuess(field,guess)
+    field = simple_solve(field)
+    if isSolved(field):
+        break
+    row,column = GetZeroPosition(field)
+    stack.append(field)
+    print(field)
+    guesses.append(GetGuesses(field,row,column))
+    print(guesses)
+    
+if isSolved(field):
+    print("Solution result:")
+    print(field)
+else:
+    print("Solution FAILED! Last state:")
+    print(field)
+    
 
 
