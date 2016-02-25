@@ -1,7 +1,8 @@
 #!/usr/bin/python
 import numpy as np
 #convert from strings to numpy array of chars
-fname = "sudoku-task1.txt"
+#fname = "sudoku-task1.txt"
+fname = "sudoku-task2.txt"
 with open(fname) as f:
     array = []
     for line in f:
@@ -111,15 +112,18 @@ def UseGuess(array, guess):
     array[guess[1],guess[2]] = guess[0]
     return array
     
-
-field = simple_solve(field)    
+field = simple_solve(field)
+# print("--------After simple solve ---------")
+# print(field)
+# print(field-field0)
 row,column = GetZeroPosition(field)
 stack = []
 guesses = []
 stack.append(field)
+#print(stack)
 guesses.append(GetGuesses(field,row,column))
 #guesses[-1].pop() ## TODO remove debug
-print(guesses)
+#print(guesses)
 while not isSolved(field):
     # Stop if there is no guesses.
     if len(guesses) == 0:
@@ -131,17 +135,23 @@ while not isSolved(field):
         guesses.pop()
         continue
     # try a guess
-    field = stack[-1]
+    field = np.copy(stack[-1])
     guess = guesses[-1].pop()
     field = UseGuess(field,guess)
+    # print(stack)
     field = simple_solve(field)
+    # print("--------After  solve ---------")
+    # print(field)
+    # print(field - field0)
     if isSolved(field):
         break
     row,column = GetZeroPosition(field)
     stack.append(field)
-    print(field)
+    # print(stack)
     guesses.append(GetGuesses(field,row,column))
-    print(guesses)
+    print("Stack size = "+str(len(stack)))
+    # print(field)
+    # print(guesses)
     
 if isSolved(field):
     print("Solution result:")
