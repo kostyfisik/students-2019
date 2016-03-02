@@ -1,3 +1,6 @@
+#Pkg.update()
+#Pkg.add("DataStructures")
+
 using DataStructures
 
 function load_field(filename)
