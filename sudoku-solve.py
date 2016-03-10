@@ -2,8 +2,6 @@
 import numpy as np
 #convert from strings to numpy array of chars
 #fname = "sudoku-task1.txt"
-
-# test git 
 fname = "sudoku-task2.txt"
 with open(fname) as f:
     array = []
@@ -118,6 +116,12 @@ field = simple_solve(field)
 row,column = GetZeroPosition(field)
 stack = []
 guesses = []
+# 'Stack' is a list of numpy arrays and 'guesses' is a list of lists,
+# stack[i] is an sudoku matrix after 'i' attempts to guess the
+#  solution and guesses[i] is a list of possilbe guesses for the next
+#  attempt. Use of each guess give us a new decision branch and we
+#  explore all possible branches one by one untill we find a valid
+#  solution.
 stack.append(field)
 guesses.append(GetGuesses(field,row,column))
 #guesses[-1].pop() ## TODO remove debug
@@ -128,7 +132,7 @@ while not isSolved(field):
         break
     # Return to previous branch if current branch failed to solve
     if len(guesses[-1]) == 0:
-        field = stack.pop()
+        stack.pop()
         guesses.pop()
         continue
     # try a guess
