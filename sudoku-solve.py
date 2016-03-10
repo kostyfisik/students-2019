@@ -2,6 +2,8 @@
 import numpy as np
 #convert from strings to numpy array of chars
 #fname = "sudoku-task1.txt"
+
+# test git 
 fname = "sudoku-task2.txt"
 with open(fname) as f:
     array = []
