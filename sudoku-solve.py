@@ -109,7 +109,8 @@ def GetGuesses(array, row, column):
     return guesses
 
 def UseGuess(array, guess):
-    array[guess[1],guess[2]] = guess[0]
+    value, row, column = guess
+    array[row,column] = value
     return array
     
 field = simple_solve(field)
