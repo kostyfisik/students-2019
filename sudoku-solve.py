@@ -1,149 +1,176 @@
-#!/usr/bin/python
 import numpy as np
-#convert from strings to numpy array of chars
+import copy as cp
 #fname = "sudoku-task1.txt"
 fname = "sudoku-task2.txt"
-with open(fname) as f:
-    array = []
-    for line in f:
-        if (len(line)>9):
-            splitted = line.split()
-            joined = ""
-            for numbers in splitted:
-                joined += numbers
-            array.append(joined)
-joined = ""
-for numbers in array:
-    joined += numbers
-numbers = []
-for char in joined:
-    numbers.append(int(char))
-field = np.asarray(numbers)
-field = np.reshape(field,(9,9))
-print("Sudoku to solve")
-print(field)
 
-def isInArray(array, char):
+def get_options_temp(array):
+    temp=np.array([1,2,3,4,5,6,7,8,9])
+    options=[]
+    for i in range(9):
+        for j in range(9):
+            if array[i,j]==0:
+                options.append(a)
+            else:
+                options.append(0)   
+    print(a)
+    print(options)
+    
+def is_in_array(array, char):
     if char in array:
         return True
     else:
         return False
-    
+
 def get_row(array, index):
     return array[index]
 
 def get_column(array, index):
-    return array[:,index]
+    return array[:, index]
 
-
-def get_subsell(array, index):
-    if index > 8 or index < 0:
-        print("ERROR!!! Subsell index is not in 0..8 range")
-        raise
-    row = int(index/3)
-    column = index % 3
-    return array[row*3:row*3+3, column*3:column*3+3]
-
-def get_subcell_index(row,column):
-    sub_row = int(row/3)
-    sub_column = int(column/3)
-    return sub_row*3 + sub_column
-    
-def isValueUsed(array, value, row, column):
-    verbose = False
-    # if row == 3 and column == 2:
-    #         verbose = True
-    if verbose:
-        print(get_row(array,row))
-    if isInArray(get_row(array,row),value) :
-        return True
-    if verbose:
-        print()
-    if isInArray(get_column(array,column),value) :
-        return True
-    if verbose:
-        print()
-    if isInArray(get_subsell(array,
-        get_subcell_index(row,column)
-        ),value) :
-        return True
-    return False
-
-#print simple solve
-def simple_solve (field):
-    changes = True
-    while changes:
-        changes = False
-        for column in range(9):
-            for row in range(9):
-                if not (field[row,column] == 0):
-                    continue
-                counts = 0
-                new_value = 0
-                for value in range(1,10):
-                    if not isValueUsed(field,value,row,column):
-                        counts += 1
-                        new_value = value
-                    if counts > 1:
-                        break
-                if counts == 1:
-                    field[row,column] = new_value
-                    changes = True
-    return field
-
-def isSolved (array):
-    return not isInArray(array,0)
-
-def GetZeroPosition(array):
-    for column in range(9):
-        for row in range(9):
-            if field[row,column] == 0:
-                return row,column
-    return 9,9
-
-def GetGuesses(array, row, column):
-    guesses = []
+def get_cell(array, row, column):
+    temp = np.zeros(9, dtype=np.int8)
+    count=0
+    for i in range((row//3)*3, (row//3)*3+3):
+        for j in range((column//3)*3, (column//3)*3+3):
+            temp[count]=array[i,j]
+            count+=1
+    return temp
+         
+                
+def get_options(array, row, column):
+    temp=[]
     for value in range(1,10):
-        if not isValueUsed(field,value,row,column):
-            guesses.append((value,row,column))
-    return guesses
-
-def UseGuess(array, guess):
-    array[guess[1],guess[2]] = guess[0]
+        if (not is_in_array(get_row(array, row), value) 
+            and not is_in_array(get_column(array, column), value) 
+            and not is_in_array(get_cell(array, row, column), value)):
+            temp.append(value)
+    answer=np.array((temp), dtype=np.int8)
+    return answer
+            
+def step_1(array):
+    changed = True
+    while changed:
+        changed = False
+        list_of_options=[]
+        for i in range(9):
+            for j in range(9):
+                list_of_options.append(get_options(array, i, j))
+        count=0
+        for i in range(9):
+            if changed:
+                break            
+            else:
+                for j in range(9):
+                    if changed:
+                        break
+                    else:
+                        if len(list_of_options[count])==1 and array[i,j]==0:
+                            array[i,j] = int(list_of_options[count])                            
+                            changed = True                        
+                        count+=1                        
     return array
-    
-field = simple_solve(field)
-row,column = GetZeroPosition(field)
-stack = []
-guesses = []
-stack.append(field)
-guesses.append(GetGuesses(field,row,column))
-#guesses[-1].pop() ## TODO remove debug
-while not isSolved(field):
-    # Stop if there is no guesses.
-    if len(guesses) == 0:
-        print("No more guesses")
+
+def step_2(array):
+    temp1=cp.copy(array)
+    changed = True
+    while changed:
+        changed = False
+        list_of_options=[]
+        for i in range(9):
+            for j in range(9):
+                list_of_options.append(get_options(array, i, j))
+        count=0
+        for i in range(9):
+            if changed:
+                break            
+            else:
+                for j in range(9):
+                    if changed:
+                        break
+                    else:
+                        if len(list_of_options[count])==2 and array[i,j]==0:
+                            row=i
+                            column=j
+                            value=list_of_options[2]
+                            temp1[i,j] = int(list_of_options[count][1])
+                            step_1(temp1)
+                            if is_correct(temp1):
+                                return temp1                                
+                            else:
+                                array[row, column] = value
+                                step_1(array)
+                                return array
+                            changed = True                
+                        count+=1                        
+
+def is_solved(array):
+    if 0 in array:
+        return False
+    else:
+        return True
+
+def validation(array):   
+    if is_correct(array):        
+        return(array)       
+    else:
+        print('ERROR! Last statement:')
+        print(array2)
+        raise
+                                                   
+def is_correct(array):
+    for row in range(9):
+        for value in range(1,10):
+            if get_row(array, row).tolist().count(value)>1:
+                return False
+            else:
+                for column in range(9):
+                    for value in range(1,10):
+                        if get_column(array, column).tolist().count(value)>1:
+                            return False
+                        else:
+                            for row in [0,3,6]:
+                                for column in [0,3,6]:
+                                    for value in range(1,10):
+                                        if get_cell(array, row, column).tolist().count(value)>1:
+                                            return False
+                                        else:
+                                            return True
+
+sudoku = np.zeros((9,9), dtype=np.int8)
+f = open(fname)
+inputmas= f.read()
+splitted=inputmas.split()
+joined=""
+for numbers in splitted:
+    joined+=numbers
+i=0
+j=0
+for numbers in joined:
+    sudoku[i,j]=int(numbers)
+    j+=1
+    if j>8:
+        j=0
+        i+=1
+print('Sudoku to solve:')
+print(sudoku)
+temp_sudoku=cp.copy(sudoku)
+temp_sudoku=step_1(temp_sudoku)
+sudoku=np.copy(validation(temp_sudoku))
+sudoku=np.copy(validation(temp_sudoku))
+if is_solved(sudoku):
+    print('Sudoku is solved. Ansewer: ')
+    print(sudoku)
+    raise
+count=0
+while not is_solved(temp_sudoku):
+    temp_sudoku=step_2(temp_sudoku)
+    sudoku=np.copy(validation(temp_sudoku))
+    count+=1
+    if count>5:
         break
-    # Return to previous branch if current branch failed to solve
-    if len(guesses[-1]) == 0:
-        field = stack.pop()
-        guesses.pop()
-        continue
-    # try a guess
-    field = np.copy(stack[-1])
-    guess = guesses[-1].pop()
-    field = UseGuess(field,guess)
-    field = simple_solve(field)
-    if isSolved(field):
-        break
-    row,column = GetZeroPosition(field)
-    stack.append(field)
-    guesses.append(GetGuesses(field,row,column))
-    print("Stack size = "+str(len(stack)))
-    
-if isSolved(field):
-    print("Solution result:")
-    print(field)
+if is_solved(sudoku):
+    print('Sudoku is solved. Ansewer: ')
+    print(sudoku)    
 else:
-    print("Solution FAILED! Last state:")
-    print(field)
+    print('Sudoku is not solved. The last statement: ')
+    print(sudoku)    
