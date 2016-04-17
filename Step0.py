@@ -1,4 +1,4 @@
-%matplotlib inline 
+get_ipython().magic('matplotlib inline')
 
 import numpy as np
 import math as math
@@ -40,5 +40,3 @@ for q in range(tot_time):
             ex[m]+=source(q,t0,tau)
     if q % int(n/10)==0 or q+5>tot_time:
         drawplot(z, ex, hy, q)
-
-
