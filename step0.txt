@@ -1,0 +1,44 @@
+import numpy as np
+import math as m
+import matplotlib.pyplot as plt
+
+imp0=377.0  # Free space impedance
+
+size=300  # Domain size
+#Source 
+source_width = 20.0
+delay = 5*source_width
+#delay = 5
+
+
+source_x = int(size/2.0)
+def source(current_time, delay, source_width):
+    return m.exp(-(current_time-delay)**2/(2.0 * source_width**2))
+
+#Model
+total_steps = int(size+delay-1)  # Time stepping
+frame_interval = int(total_steps/30.0)
+all_steps = np.linspace(0, size-1, size)
+
+
+ez = np.zeros(size)
+hy = np.zeros(size)
+for time in range(total_steps+1):
+#for time in range(50):
+    hy[:-1] = hy[:-1] + (ez[1:] - ez[:-1])/imp0
+    ez[1:] = ez[1:] + (hy[1:]-hy[:-1])*imp0
+    ez[source_x] += source(time, delay, source_width)
+    if time % frame_interval == 0 or time+5 > total_steps:
+        fig, ax = plt.subplots(2)#, sharey=True, sharex=True)
+        fig.tight_layout()
+        plt.title("After t=%d"%time)
+        ax[0].plot(all_steps, ez, label="Ez")
+        ax[0].plot(all_steps, hy*imp0,  label="Hy*imp0")
+        ax[0].legend(loc='upper right')
+        ax[1].plot(all_steps, ez,  label="Ez")
+        ax[1].legend(loc='lower left')
+        plt.savefig("step0-at-time-%d.png"%time,pad_inches=0.002, bbox_inches='tight')
+        
+        #    plt.show()
+        #plt.clf()
+        plt.close()
