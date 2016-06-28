@@ -1,0 +1,68 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+imp0=377.0  
+
+size=1800  # Domain size
+#Dielectric distribution
+epsilon = 25
+eps= np.zeros(size)
+eps[:] = epsilon
+
+#Source 
+source_width = 30.0*np.sqrt(epsilon)
+delay = 10*source_width
+
+source_x = int(size/2.0)
+def source(current_time, delay, source_width):
+    return np.exp(-(current_time-delay)**2/(2.0 * source_width**2))
+
+#Model
+total_steps = int((size*2.0+delay)*np.sqrt(epsilon))  # Time stepping
+frame_interval = int(total_steps/20.0)
+all_steps = np.linspace(0, size-1, size)
+
+ez = np.zeros(size)
+hy = np.zeros(size)
+
+
+#CPML (Inan pp.228-230)
+R0 = 1e-6
+m = 4  # Order of polynomial grading
+pml_width = 5.0
+sxmax = -(m+1)*np.log(R0)/2/imp0/(pml_width)
+sx = np.zeros(size) #=sigma_x
+sxm = np.zeros(size)
+Psihx = np.zeros(size) #p227
+Psiex = np.zeros(size)
+
+for mm in range(int(pml_width)):
+    sx[mm+1] = sxmax*((pml_width-mm-0.5)/pml_width)**m
+    sxm[mm] = sxmax*((pml_width-mm)/pml_width)**m  # Shifted to the right (because of Yee algorithm everything starts by H-field)
+    sx[size-mm-1] = sxmax*((pml_width-mm-0.5)/pml_width)**m  
+    sxm[size-mm-1] = sxmax*((pml_width-mm)/pml_width)**m
+# print(sx, sxm)
+aex = np.exp(-sx*imp0)-1
+bex = np.exp(-sx*imp0)
+ahx = np.exp(-sxm*imp0)-1
+bhx = np.exp(-sxm*imp0)
+
+x = np.arange(0,size-1,1)
+
+
+for time in range(total_steps+1):
+    Psihx[x] = bhx[x]*Psihx[x] + ahx[x]*(ez[x+1] - ez[x])
+    hy[x] = hy[x] + (ez[x+1] - ez[x])/imp0 + Psihx[x]/imp0
+    Psiex[x+1] = bex[x+1]*Psiex[x+1] + aex[x+1]*(hy[x+1]-hy[x])
+    ez[x+1] = ez[x+1] + (hy[x+1]-hy[x])*imp0/eps[x] +Psiex[x+1]*imp0/eps[x]
+    ez[source_x] += source(time, delay, source_width)
+    # Output
+    if time % frame_interval == 0:
+        plt.clf()
+        plt.title("Ez after t=%i"%time)
+        plt.plot(all_steps, ez, all_steps, hy*imp0)
+        plt.savefig("step2-at-time-%i-pml-width-%i.png"%(time,int(pml_width)),pad_inches=0.02, bbox_inches='tight')
+        #plt.draw()
+        #    plt.show()
+        #plt.clf()
+        plt.close()
