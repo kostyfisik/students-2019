@@ -2,8 +2,9 @@
 import numpy as np
 
 # convert from strings to numpy array of chars
-filename = "sudoku-task1.txt"
-# filename = "sudoku-task2.txt"
+filename = "sudoku-task0.txt"
+#filename = "sudoku-task1.txt"
+#filename = "sudoku-task2.txt"
 with open(filename) as f:
     array = []
     for line in f:
@@ -126,6 +127,11 @@ def UseGuess(array, guess):
 
 
 field = simple_solve(field)
+if isSolved(field):
+    print("Solution result:")
+    print(field)
+    quit()
+
 row, column = GetZeroPosition(field)
 stack = []
 guesses = []
