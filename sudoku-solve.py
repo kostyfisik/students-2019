@@ -2,9 +2,11 @@
 import numpy as np
 
 # convert from strings to numpy array of chars
-filename = "sudoku-task0.txt"
+#filename = "sudoku-task0.txt"
 #filename = "sudoku-task1.txt"
 #filename = "sudoku-task2.txt"
+#filename = "sudoku-task3.txt"
+filename = "sudoku-task5.txt"
 with open(filename) as f:
     array = []
     for line in f:
