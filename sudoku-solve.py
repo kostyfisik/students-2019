@@ -5,8 +5,8 @@ import numpy as np
 #filename = "sudoku-task0.txt"
 #filename = "sudoku-task1.txt"
 #filename = "sudoku-task2.txt"
-filename = "sudoku-task4.txt"
-#filename = "sudoku-task6.txt"
+#filename = "sudoku-task4.txt"
+filename = "sudoku-task3.txt"
 with open(filename) as f:
     array = []
     for line in f:
@@ -146,6 +146,7 @@ guesses = []
 stack.append(field)
 guesses.append(GetGuesses(field, row, column))
 # guesses[-1].pop() ## TODO remove debug
+i=0
 while not isSolved(field):
     # Stop if there is no guesses.
     if len(guesses) == 0:
@@ -166,7 +167,9 @@ while not isSolved(field):
     row, column = GetZeroPosition(field)
     stack.append(field)
     guesses.append(GetGuesses(field, row, column))
-    print("Stack size = " + str(len(stack)))
+    i += 1
+    if i%100 == 0: 
+        print("Stack size = " + str(len(stack)))
 
 if isSolved(field):
     print("Solution result:")
